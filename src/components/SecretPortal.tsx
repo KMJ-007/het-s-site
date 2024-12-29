@@ -2,11 +2,17 @@
 import { useState, useEffect } from 'react'
 import GlitchText from './GlitchText'
 
-export default function SecretPortal() {
+interface SecretPortalProps {
+  onEasterEggFound: () => void
+}
+
+export default function SecretPortal({ onEasterEggFound }: SecretPortalProps) {
   const [konami, setKonami] = useState<string[]>([])
   const [showSecret, setShowSecret] = useState(false)
+  const [mousePattern, setMousePattern] = useState<string[]>([])
   const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']
 
+  // Konami code handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       setKonami(prev => {
@@ -22,11 +28,54 @@ export default function SecretPortal() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  // Mouse pattern handler (new easter egg)
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const direction = e.movementX > 0 ? 'right' : 'left'
+      setMousePattern(prev => {
+        const newPattern = [...prev, direction]
+        if (newPattern.join('') === 'leftrightrightleft') {
+          onEasterEggFound()
+          return []
+        }
+        return newPattern.slice(-5)
+      })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [onEasterEggFound])
+
+  // Check Konami code
   useEffect(() => {
     if (konami.join(',') === konamiCode.join(',')) {
       setShowSecret(true)
+      onEasterEggFound()
     }
-  }, [konami])
+  }, [konami, onEasterEggFound])
+
+  // Source code comment easter egg
+  useEffect(() => {
+    console.log(
+      '%cLooking at the source code? Here\'s an egg for you! Type "hackerman" in the console',
+      'color: #0f0; font-size: 12px'
+    )
+    
+    const originalLog = console.log
+    // @ts-ignore
+    console.log = (...args: any[]) => {
+      if (args[0] === 'hackerman') {
+        onEasterEggFound()
+        alert('🥚 You found a console egg!')
+      }
+      originalLog.apply(console, args)
+    }
+    
+    return () => {
+      // @ts-ignore
+      console.log = originalLog
+    }
+  }, [onEasterEggFound])
 
   return (
     <div className="mt-12">
@@ -40,26 +89,30 @@ export default function SecretPortal() {
             </span>
           </p>
           
-          {/* Hidden message in HTML comments */}
-          {/* Another easter egg: Check the Network tab */}
           <img 
             src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=You're getting warmer!"
             alt="QR Code"
             className="mt-4 cursor-pointer"
             onClick={() => {
-              // Secret console message
               console.log('%c🔓 Getting closer...', 'color: #00ff00; font-size: 20px;')
+              onEasterEggFound()
             }}
           />
         </div>
       ) : (
-        <div className="text-xs opacity-30 hover:opacity-100 transition-opacity">
+        <div 
+          className="text-xs opacity-30 hover:opacity-100 transition-opacity"
+          onContextMenu={(e) => {
+            e.preventDefault()
+            onEasterEggFound()
+            alert('🥚 Right-click egg found!')
+          }}
+        >
           {/* Hint in ROT13 encoding */}
           Uvag: Hfr gur Xbanzv Pbqr
         </div>
       )}
       
-      {/* Hidden div with base64 encoded message */}
       <div className="hidden">
         SGV5ISBZb3UgZm91bmQgbWUhIFRyeSB0aGUgS29uYW1pIGNvZGUh
       </div>

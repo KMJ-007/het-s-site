@@ -24,6 +24,8 @@ export default function MatrixBackground() {
     }
 
     function draw() {
+      if (!ctx || !canvas) return  // Early return if context or canvas is null
+      
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       
@@ -51,4 +53,4 @@ export default function MatrixBackground() {
       className="fixed top-0 left-0 w-full h-full opacity-50"
     />
   )
-} 
+}

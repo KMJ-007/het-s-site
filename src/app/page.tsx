@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import MatrixBackground from '@/components/MatrixBackground'
 import HackerTerminal from '@/components/HackerTerminal'
 import SecretPortal from '@/components/SecretPortal'
@@ -9,8 +9,12 @@ export default function Home() {
   const [accessGranted, setAccessGranted] = useState(false)
   const [easterEggsFound, setEasterEggsFound] = useState(0)
 
+  const handleEasterEggFound = () => {
+    setEasterEggsFound(prev => prev + 1)
+  }
+
   return (
-    <div className="min-h-screen bg-black text-green-500 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-green-500 relative overflow-hidden font-mono">
       <MatrixBackground />
       
       {!accessGranted ? (
@@ -20,19 +24,20 @@ export default function Home() {
           <GlitchText text="Welcome to Het's Cyber Realm" className="text-4xl mb-8" />
           
           <div className="space-y-6">
-            <p className="font-mono">STATUS: ENCRYPTED</p>
-            <p className="font-mono">EASTER EGGS FOUND: {easterEggsFound}/7</p>
+            <p>STATUS: ENCRYPTED</p>
+            <p>EASTER EGGS FOUND: {easterEggsFound}/7</p>
             
             {/* Hidden button that only appears when inspecting elements */}
             <button 
+              type="button"
               className="opacity-0 hover:opacity-100"
-              onClick={() => setEasterEggsFound(prev => prev + 1)}
+              onClick={handleEasterEggFound}
             >
               You found a secret!
             </button>
           </div>
 
-          <SecretPortal />
+          <SecretPortal onEasterEggFound={handleEasterEggFound} />
         </main>
       )}
     </div>
